@@ -9,7 +9,7 @@ import os
 from dotenv import load_dotenv
 from pprint import pprint
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 
 load_dotenv()
 webhook = os.getenv('WEBHOOK')
@@ -26,14 +26,21 @@ def create_event(dictUser:dict):
 
     bit.call('calendar.event.add',  dictUser)
     
-def get_all_contact():
-    contact = bit.get_all('crm.contact.list')
+def get_all_contact(isNowDay:bool=False):
+    if isNowDay:
+        dateNow=datetime.now()-timedelta(days=1)
+        dateNow=dateNow.strftime("%Y-%m-%d")
+        # dateNow=
+        contact = bit.get_all('crm.contact.list', params={'filter':{'>=DATE_CREATE': dateNow}})
+    else:
+        contact = bit.get_all('crm.contact.list')
+
     return contact
 
 def create_event_to_brithday():
-    users = get_all_users()
-    users=get_all_contact()   
-    
+    # users = get_all_users()
+    users=get_all_contact(True)   
+    pprint(users)
     for user in users:
         # birthday = user.get('PERSONAL_BIRTHDAY')
         
@@ -71,16 +78,17 @@ def create_event_to_brithday():
         }
         pprint(fields)
         create_event(fields)
-        1/0
-        break
+        # 1/0
+        # break
 
 
         pass        
 
 def main():
-    users=get_all_users()
+    users=get_all_contact(True)  
     pprint(users)
 
+# main()
 create_event_to_brithday()
 # cont=get_all_contact()
 # pprint(cont)
